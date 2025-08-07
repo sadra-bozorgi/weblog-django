@@ -1,0 +1,70 @@
+{% extends 'base.html' %}{% load static %}
+{% load jalali_tags %}
+{% load tz %}
+{% block title %}
+weblog
+{% endblock %}
+{% block body %}
+
+<!-- ورود/خروج کاربر -->
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">خروج</button>
+    </form>
+{% else %}
+<div>
+    <a href="{% url 'login' %}">ورود</a> |
+    <a href="{% url 'register' %}">ثبت‌نام</a>
+</div>
+{% endif %}
+
+<!-- Blog Section Start -->
+<section class="blog-section section-b-space">
+    <div class="container-fluid-lg">
+        <div class="row g-4">
+            <div class="col-12">
+                <div class="row g-4 ratio_65">
+                    {% for post in posts %}
+                        <div class="col-lg-4 col-md-6 col-sm-12">
+                            <div class="blog-box wow fadeInUp">
+                                <div class="blog-image">
+                                    <a href="{% url 'maqale:post_detail' pk=post.pk %}">
+                                        {% if post.image %}
+                                            <img src="{{ post.image.url }}" class="bg-img blur-up lazyload" alt="{{ post.title }}">
+                                        {% else %}
+                                            <img src="{% static 'images/default.jpg' %}" class="bg-img" alt="no image">
+                                        {% endif %}
+                                    </a>
+                                </div>
+
+                                <div class="blog-contain">
+                                    <div class="blog-label">
+                                        <span class="time">
+                                            <i data-feather="clock"></i>
+                                            <span>{{ post.created_at|localtime|to_jalali }}</span>
+                                        </span>
+                                        <span class="super">
+                                            <i data-feather="user"></i>
+                                            <span>{{ post.author.username }}</span>
+                                        </span>
+                                    </div>
+                                    <a href="{% url 'maqale:post_detail' pk=post.pk %}">
+                                        <h3>{{ post.title }}</h3>
+                                    </a>
+                                    <button onclick="location.href='{% url 'maqale:post_detail' pk=post.pk %}'" class="blog-button">
+                                        بیشتر بخوانید <i class="fa-solid fa-left-long"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <p>هنوز مطلبی منتشر نشده.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

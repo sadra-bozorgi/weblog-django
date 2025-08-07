@@ -1,0 +1,66 @@
+{% extends 'base.html' %}{% load static %}
+{% load jalali_tags %}
+{% load tz %}
+{% block title %}
+register
+{% endblock %}
+{% block body %}
+
+<section class="log-in-section section-b-space">
+    <div class="container-fluid-lg w-100">
+        <div class="row">
+            <div class="col-xxl-6 col-xl-5 col-lg-6 d-lg-block d-none ms-auto">
+                <div class="image-contain">
+                    <img src="{% static 'assets/images/inner-page/sign-up.png' %}" class="img-fluid" alt="">
+                </div>
+            </div>
+
+            <div class="col-xxl-4 col-xl-5 col-lg-6 me-auto">
+                <div class="log-in-box">
+                    <div class="log-in-title">
+                        <h3>به فست کارت خوش آمدید</h3>
+                        <h4>ایجاد حساب کاربری</h4>
+                    </div>
+
+                    <div class="input-box">
+                        <form method="post" class="row g-4" novalidate>
+                            {% csrf_token %}
+
+                            {% if form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {{ form.non_field_errors }}
+                                </div>
+                            {% endif %}
+
+                            {% for field in form %}
+                                <div class="col-12">
+                                    <div class="form-floating theme-form-floating position-relative">
+                                     {{ field }}
+                                         <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                                        {% if field.errors %}
+                                         <div class="invalid-feedback d-block mt-1">
+                                            {{ field.errors.0 }}
+                                     </div>
+                                 {% endif %}
+                             </div>
+                         </div>
+                    {% endfor %}
+                            <div class="col-12">
+                                <button class="btn btn-animation w-100" type="submit">ثبت نام</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="sign-up-box">
+                        <h4>حساب کاربری دارید ؟</h4>
+                        <a href="{% url 'login' %}">وارد شوید</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xxl-7 col-xl-6 col-lg-6"></div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

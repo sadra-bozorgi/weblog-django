@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load jalali_tags %}
+{% load tz %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block body %}
+<div class="container py-5" style="font-family: 'sans-serif', 'Vazirmatn';">
+
+    <!-- تصویر و اطلاعات پست -->
+    <div class="text-center mb-4">
+        {% if post.image %}
+        <img src="{{ post.image.url }}" alt="{{ post.title }}" class="img-fluid rounded shadow-sm" style="max-width: 400px; height: auto;">
+        {% endif %}
+    </div>
+
+    <div class="mb-6 text-center">
+        <h1 class="mb-2">{{ post.title }}</h1>
+        <ul class="list-inline text-muted small">
+            <li class="list-inline-item"><i class="fa fa-user"></i> {{ post.author.username }}</li>
+            <li class="list-inline-item"><i class="fa fa-calendar"></i> {{ post.created_at|localtime|to_jalali }}</li>
+            <li class="list-inline-item"><i class="fa fa-comments"></i> {{ comments.count }} دیدگاه</li>
+        </ul>
+        {% if post.tags.all %}
+        <div class="mt-2">
+            {% for tag in post.tags.all %}
+            <span class="badge bg-success">{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- محتوای پست -->
+    <div class="mb-5 px-3 px-md-5">
+        <div class="fs-5 lh-lg text-justify">{{ post.content|linebreaks }}</div>
+    </div>
+
+    <!-- دیدگاه‌ها -->
+    <div class="comment-box overflow-hidden">
+        <h3 class="mb-4 border-bottom pb-2">دیدگاه‌ها</h3>
+
+        {% if comments %}
+        <ul class="list-unstyled">
+            {% for comment in comments %}
+            <li class="mb-4 p-3 bg-light rounded border shadow-sm">
+                <div class="d-flex align-items-center mb-2">
+                    <img src="{% static 'assets/images/inner-page/user/1.jpg' %}" class="rounded-circle me-3" width="45" height="45" alt="User Avatar">
+                    <div>
+                        <strong>{{ comment.user.username }}</strong><br>
+                        <small class="text-muted">{{ comment.created_at|localtime|to_jalali }}</small>
+                    </div>
+                </div>
+                <p class="mb-2">{{ comment.content }}</p>
+
+                <!-- لایک -->
+                {% if user.is_authenticated %}
+                <form method="post" action="{% url 'maqale:like_comment' comment.id %}" class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">❤️ ({{ comment.likes.count }})</button>
+                </form>
+                {% endif %}
+
+                <!-- ریپلای‌ها -->
+                {% for reply in comment.replies.all %}
+                <div class="border-start ps-3 mt-3 ms-4">
+                    <div class="d-flex align-items-center mb-1">
+                        <img src="{% static 'assets/images/inner-page/user/1.jpg' %}" class="rounded-circle me-2" width="35" height="35" alt="User Avatar">
+                        <strong>{{ reply.user.username }}</strong>
+                        <small class="text-muted ms-auto">{{ reply.created_at|localtime|to_jalali }}</small>
+                    </div>
+                    <p class="mb-1">{{ reply.content }}</p>
+                </div>
+                {% endfor %}
+
+                <!-- فرم پاسخ -->
+                {% if user.is_authenticated %}
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                    {{ form.content }}
+                    <button type="submit" class="btn btn-sm btn-primary mt-2">ارسال پاسخ</button>
+                </form>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">هنوز دیدگاهی ثبت نشده است.</p>
+        {% endif %}
+    </div>
+
+    <!-- فرم ارسال دیدگاه جدید -->
+    {% if user.is_authenticated %}
+    <div class="mt-5">
+        <h4 class="mb-3">ارسال دیدگاه جدید</h4>
+        <form method="post" class="px-3 px-md-5">
+            {% csrf_token %}
+            {{ form.content }}
+            <button type="submit" class="btn btn-success mt-3">ارسال</button>
+        </form>
+    </div>
+    {% else %}
+    <div class="alert alert-warning mt-4">
+        <a href="{% url 'login' %}?next={{ request.path }}">برای ارسال نظر وارد شوید</a>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
